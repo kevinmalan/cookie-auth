@@ -13,8 +13,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Services
+builder.Services.AddTransient<ICryptographicService, CryptographicService>();
 builder.Services.AddTransient<IProfileService, ProfileService>();
 builder.Services.AddTransient<IRefreshTokenService, RefreshTokenService>();
+builder.Services.AddTransient<ITokenService, TokenService>();
 
 // Config
 builder.Services.Configure<TokenConfig>(builder.Configuration.GetSection("Token"));

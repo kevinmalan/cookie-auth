@@ -4,9 +4,9 @@
     {
         public int Id { get; set; }
         public Guid LookupId { get; set; }
-        public string AccessTokenId { get; set; }
+        public Guid AccessTokenId { get; set; }
         public int ProfileId { get; set; }
-        public Guid Value { get; set; }
+        public string Value { get; set; }
         public DateTimeOffset ExpiresOn { get; set; }
 
         public Profile Profile { get; set; }

@@ -9,7 +9,7 @@ namespace Core.Contexts
         {
         }
 
-        public DbSet<Profile> Profiles { get; set; }
-        public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<Profile> Profile { get; set; }
+        public DbSet<RefreshToken> RefreshToken { get; set; }
     }
 }

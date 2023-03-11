@@ -21,6 +21,7 @@ namespace Core.Services
         {
             var claims = new[]
             {
+                new Claim("jti", $"{Guid.NewGuid()}"),
                 new Claim("username", username),
                 new Claim("role", role)
             };
@@ -30,9 +31,10 @@ namespace Core.Services
                 issuer: _tokenConfig.Issuer,
                 audience: _tokenConfig.Audience,
                 claims: claims,
-                expires: _tokenConfig.AccessToken.Expires,
+                expires: DateTime.UtcNow.Add(_tokenConfig.AccessToken.Expires),
                 signingCredentials: new SigningCredentials(secret, SecurityAlgorithms.HmacSha256)
            );
+
 
             return Tuple.Create(token, new JwtSecurityTokenHandler().WriteToken(token));
         }
@@ -49,7 +51,7 @@ namespace Core.Services
                 issuer: _tokenConfig.Issuer,
                 audience: _tokenConfig.Audience,
                 claims: claims,
-                expires: _tokenConfig.IdToken.Expires,
+                expires: DateTime.UtcNow.Add(_tokenConfig.IdToken.Expires),
                 signingCredentials: new SigningCredentials(secret, SecurityAlgorithms.HmacSha256)
            );
 

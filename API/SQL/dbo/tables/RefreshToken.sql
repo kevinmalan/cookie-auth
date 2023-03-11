@@ -1,13 +1,13 @@
 ﻿CREATE TABLE [dbo].[RefreshToken]
 (
 	[Id] INT NOT NULL IDENTITY(1,1) PRIMARY KEY,
-	[LookupId] UNIQUEIDENTIFIER NOT NULL,
-	[AccessTokenId] NVARCHAR(100) NOT NULL,
+	[LookupId] UNIQUEIDENTIFIER UNIQUE NOT NULL,
+	[AccessTokenId] UNIQUEIDENTIFIER NOT NULL,
 	[ProfileId] INT NOT NULL FOREIGN KEY REFERENCES [dbo].[Profile] ([Id]),
-	[Value] UNIQUEIDENTIFIER NOT NULL,
+	[Value] NVARCHAR(64) NOT NULL,
 	[ExpiresOn] DATETIMEOFFSET NOT NULL
 );
 GO
-CREATE INDEX [IX_LookupId]
-ON [dbo].[RefreshToken] ([LookupId])
+CREATE INDEX [IX_ProfileId]
+ON [dbo].[RefreshToken] ([ProfileId])
 GO

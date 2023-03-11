@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Shared.Configuration;
 using Shared.Dtos.Requests;
+using Shared.Dtos.Responses;
 
 namespace Core.Services
 {
@@ -22,7 +23,7 @@ namespace Core.Services
             _tokenConfig = tokenOptions.Value;
         }
 
-        public async Task CreateProfileAsync(RegisterProfileRequest request)
+        public async Task<AuthenticatedResponse> CreateProfileAsync(RegisterProfileRequest request)
         {
             await GuardAgainstNullOrWhiteSpace(request.Username, request.Password);
             await GuardAgainstExistingProfileAsync(request.Username);
@@ -43,10 +44,10 @@ namespace Core.Services
             };
             var refreshToken = new DomainModels.RefreshToken
             {
-                AccessTokenId = accessTokenTuple.Item1.Id,
-                ExpiresOn = _tokenConfig.RefreshToken.Expires,
+                AccessTokenId = Guid.Parse(accessTokenTuple.Item1.Id),
+                ExpiresOn = DateTimeOffset.UtcNow.Add(_tokenConfig.RefreshToken.Expires),
                 LookupId = Guid.NewGuid(),
-                Value = Guid.NewGuid(),
+                Value = $"{Guid.NewGuid()}",
                 Profile = profile,
             };
 
@@ -54,7 +55,12 @@ namespace Core.Services
             await _dataContext.AddAsync(refreshToken);
             await _dataContext.SaveChangesAsync();
 
-            // Create a CookieService that can store the token in cookies.
+            return new AuthenticatedResponse
+            {
+                AccessToken = accessTokenTuple.Item2,
+                IdToken = idToken,
+                RefreshToken = refreshToken.Value
+            };
         }
 
         private async Task GuardAgainstNullOrWhiteSpace(params string[] values)
@@ -68,7 +74,7 @@ namespace Core.Services
 
         private async Task GuardAgainstExistingProfileAsync(string username)
         {
-            var exists = await _dataContext.Profiles.AnyAsync(x => x.Username == username);
+            var exists = await _dataContext.Profile.AnyAsync(x => x.Username == username);
 
             if (exists)
                 throw new Exception(""); // Forbidden

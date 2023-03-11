@@ -12,17 +12,17 @@
     public class AccessToken
     {
         public string Secret { get; set; }
-        public DateTime Expires { get; set; }
+        public TimeSpan Expires { get; set; }
     }
 
     public class IdToken
     {
         public string Secret { get; set; }
-        public DateTime Expires { get; set; }
+        public TimeSpan Expires { get; set; }
     }
 
     public class RefreshToken
     {
-        public DateTime Expires { get; set; }
+        public TimeSpan Expires { get; set; }
     }
 }
