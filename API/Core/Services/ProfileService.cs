@@ -13,17 +13,19 @@ namespace Core.Services
         private readonly ICryptographicService _cryptographicService;
         private readonly ITokenService _tokenService;
         private readonly IProfileFlowRepository _profileFlowRepository;
+        private readonly IRefreshTokenRepository _refreshTokenRepository;
         private readonly TokenConfig _tokenConfig;
 
-        public ProfileService(ICryptographicService cryptographicService, ITokenService tokenService, IOptions<TokenConfig> tokenOptions, IProfileFlowRepository profileFlowRepository)
+        public ProfileService(ICryptographicService cryptographicService, ITokenService tokenService, IOptions<TokenConfig> tokenOptions, IProfileFlowRepository profileFlowRepository, IRefreshTokenRepository refreshTokenRepository)
         {
             _cryptographicService = cryptographicService;
             _tokenService = tokenService;
             _profileFlowRepository = profileFlowRepository;
+            _refreshTokenRepository = refreshTokenRepository;
             _tokenConfig = tokenOptions.Value;
         }
 
-        public async Task<AuthenticatedResponse> CreateProfileAsync(RegisterProfileRequest request)
+        public async Task<AuthenticatedResponse> CreateAsync(RegisterProfileRequest request)
         {
             GuardAgainstNullOrWhiteSpace(request.Username, request.Password);
             await _profileFlowRepository.GuardAgainstExistingProfileAsync(request.Username);
@@ -47,8 +49,7 @@ namespace Core.Services
                 AccessTokenId = Guid.Parse(accessTokenTuple.Item1.Id),
                 ExpiresOn = DateTimeOffset.UtcNow.Add(_tokenConfig.RefreshToken.Expires),
                 LookupId = Guid.NewGuid(),
-                Value = $"{Guid.NewGuid()}",
-                Profile = profile,
+                Value = $"{Guid.NewGuid()}"
             };
 
             await _profileFlowRepository.CreateProfileAndRefreshTokenAsync(profile.ToEntity(), refreshToken.ToEntity());
@@ -58,6 +59,27 @@ namespace Core.Services
                 AccessToken = accessTokenTuple.Item2,
                 IdToken = idToken,
                 RefreshToken = refreshToken.Value
+            };
+        }
+
+        public async Task<AuthenticatedResponse> LoginAsync(LoginProfileRequest request)
+        {
+            GuardAgainstNullOrWhiteSpace(request.Username, request.Password);
+            await _profileFlowRepository.GuardAgainstProfileNotExistingAsync(request.Username);
+            var profileEntity = await _profileFlowRepository.GetProfileByUsernameAsync(request.Username);
+            var profile = profileEntity.ToModel();
+            var hashed = _cryptographicService.HashPassword(request.Password, profile.Salt);
+            if (profile.PasswordHash != hashed.Hash)
+                throw new Exception(""); // Forbidden
+            var role = "Admin";
+            var accessTokenTuple = _tokenService.CreateAccessToken(request.Username, role);
+            var idToken = _tokenService.CreateIdToken(request.Username);
+            var refreshTokenEntity = await _refreshTokenRepository.GetLatestByProfileIdAsync(profileEntity.Id);
+            return new AuthenticatedResponse
+            {
+                AccessToken = accessTokenTuple.Item2,
+                IdToken = idToken,
+                RefreshToken = refreshTokenEntity.Value
             };
         }
 

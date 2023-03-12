@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Shared.Configuration;
 using Shared.Dtos.Requests;
+using Shared.Dtos.Responses;
 
 namespace API.Controllers
 {
@@ -21,9 +22,28 @@ namespace API.Controllers
 
         [AllowAnonymous]
         [HttpPost]
+        [Route("register")]
         public async Task<IActionResult> Register([FromBody] RegisterProfileRequest request)
         {
-            var tokens = await _profileService.CreateProfileAsync(request);
+            var tokens = await _profileService.CreateAsync(request);
+            IssueCookies(tokens);
+
+            return Ok();
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("login")]
+        public async Task<IActionResult> Login([FromBody] LoginProfileRequest request)
+        {
+            var tokens = await _profileService.LoginAsync(request);
+            IssueCookies(tokens);
+
+            return Ok();
+        }
+
+        private void IssueCookies(AuthenticatedResponse tokens)
+        {
             var accessTokenOptions = new CookieOptions
             {
                 Expires = DateTimeOffset.UtcNow.Add(_tokenConfig.AccessToken.Expires),
@@ -37,7 +57,7 @@ namespace API.Controllers
             {
                 Expires = DateTimeOffset.UtcNow.Add(_tokenConfig.IdToken.Expires),
                 HttpOnly = false,
-                Domain = _tokenConfig.Issuer, // TODO: Add domain for BE to match this. Then cookies should work.
+                Domain = _tokenConfig.Issuer,
                 Path = "/",
                 Secure = true,
                 IsEssential = true,
@@ -55,8 +75,7 @@ namespace API.Controllers
             Response.Cookies.Append("cookie-auth-access-token", tokens.AccessToken, accessTokenOptions);
             Response.Cookies.Append("cookie-auth-refresh-token", tokens.RefreshToken, refreshTokenOptions);
             Response.Cookies.Append("cookie-auth-id-token", tokens.IdToken, idTokenOptions);
-
-            return Ok();
         }
+
     }
 }

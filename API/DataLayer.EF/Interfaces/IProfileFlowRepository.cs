@@ -6,5 +6,7 @@ namespace DataLayer.EF.Interfaces
     {
         Task CreateProfileAndRefreshTokenAsync(Profile profile, RefreshToken refreshToken);
         Task GuardAgainstExistingProfileAsync(string username);
+        Task GuardAgainstProfileNotExistingAsync(string username);
+        Task<Profile> GetProfileByUsernameAsync(string username);
     }
 }

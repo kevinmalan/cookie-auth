@@ -1,6 +1,6 @@
-﻿using DataLayer.EF.Entities;
+﻿using DataLayer.EF.Contexts;
+using DataLayer.EF.Entities;
 using DataLayer.EF.Interfaces;
-using DataLayer.EF.Contexts;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataLayer.EF.Repositories.Flows
@@ -26,6 +26,19 @@ namespace DataLayer.EF.Repositories.Flows
 
             if (exists)
                 throw new Exception(""); // Forbidden
+        }
+
+        public async Task GuardAgainstProfileNotExistingAsync(string username)
+        {
+            var exists = await _dataContext.Profile.AnyAsync(x => x.Username == username);
+
+            if (!exists)
+                throw new Exception(""); // Forbidden
+        }
+
+        public async Task<Profile> GetProfileByUsernameAsync(string username)
+        {
+            return await _dataContext.Profile.SingleAsync(x => x.Username == username);
         }
     }
 }

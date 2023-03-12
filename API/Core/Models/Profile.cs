@@ -8,7 +8,5 @@
         public string Salt { get; set; }
         public string Role { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
-
-        public ICollection<RefreshToken> RefreshTokens { get; set; }
     }
 }

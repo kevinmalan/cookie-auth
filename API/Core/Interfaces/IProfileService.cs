@@ -5,6 +5,7 @@ namespace Core.Interfaces
 {
     public interface IProfileService
     {
-        Task<AuthenticatedResponse> CreateProfileAsync(RegisterProfileRequest request);
+        Task<AuthenticatedResponse> CreateAsync(RegisterProfileRequest request);
+        Task<AuthenticatedResponse> LoginAsync(LoginProfileRequest request);
     }
 }

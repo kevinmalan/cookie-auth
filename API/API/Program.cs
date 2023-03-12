@@ -2,6 +2,7 @@ using Core.Interfaces;
 using Core.Services;
 using DataLayer.EF.Contexts;
 using DataLayer.EF.Interfaces;
+using DataLayer.EF.Repositories;
 using DataLayer.EF.Repositories.Flows;
 using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +30,7 @@ builder.Services.AddTransient<ITokenService, TokenService>();
 
 // Repositories
 builder.Services.AddTransient<IProfileFlowRepository, ProfileFlowRepository>();
+builder.Services.AddTransient<IRefreshTokenRepository, RefreshTokenRepository>();
 
 // Config
 builder.Services.Configure<TokenConfig>(builder.Configuration.GetSection("Token"));
