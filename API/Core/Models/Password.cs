@@ -1,4 +1,4 @@
-﻿namespace Core.DomainModels
+﻿namespace Core.Models
 {
     public class Password
     {

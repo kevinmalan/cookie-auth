@@ -1,7 +1,7 @@
-﻿using Core.DomainModels;
+﻿using DataLayer.EF.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace Core.Contexts
+namespace DataLayer.EF.Contexts
 {
     public class DataContext : DbContext
     {

@@ -1,4 +1,4 @@
-﻿using Core.DomainModels;
+﻿using Core.Models;
 
 namespace Core.Interfaces
 {

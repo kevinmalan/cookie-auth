@@ -1,39 +1,39 @@
-﻿using Core.Contexts;
+﻿using Core.Mappers;
 using Core.Interfaces;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Shared.Configuration;
 using Shared.Dtos.Requests;
 using Shared.Dtos.Responses;
+using DataLayer.EF.Interfaces;
 
 namespace Core.Services
 {
     public class ProfileService : IProfileService
     {
-        private readonly DataContext _dataContext;
         private readonly ICryptographicService _cryptographicService;
         private readonly ITokenService _tokenService;
+        private readonly IProfileFlowRepository _profileFlowRepository;
         private readonly TokenConfig _tokenConfig;
 
-        public ProfileService(DataContext dataContext, ICryptographicService cryptographicService, ITokenService tokenService, IOptions<TokenConfig> tokenOptions)
+        public ProfileService(ICryptographicService cryptographicService, ITokenService tokenService, IOptions<TokenConfig> tokenOptions, IProfileFlowRepository profileFlowRepository)
         {
-            _dataContext = dataContext;
             _cryptographicService = cryptographicService;
             _tokenService = tokenService;
+            _profileFlowRepository = profileFlowRepository;
             _tokenConfig = tokenOptions.Value;
         }
 
         public async Task<AuthenticatedResponse> CreateProfileAsync(RegisterProfileRequest request)
         {
-            await GuardAgainstNullOrWhiteSpace(request.Username, request.Password);
-            await GuardAgainstExistingProfileAsync(request.Username);
+            GuardAgainstNullOrWhiteSpace(request.Username, request.Password);
+            await _profileFlowRepository.GuardAgainstExistingProfileAsync(request.Username);
             ValidatePasswordStrength(request.Password);
             var role = "Admin";
             var password = _cryptographicService.HashPassword(request.Password);
             var accessTokenTuple = _tokenService.CreateAccessToken(request.Username, role);
             var idToken = _tokenService.CreateIdToken(request.Username);
 
-            var profile = new DomainModels.Profile
+            var profile = new Models.Profile
             {
                 Username = request.Username,
                 LookupId = Guid.NewGuid(),
@@ -42,7 +42,7 @@ namespace Core.Services
                 Salt = password.Salt,
                 Role = role,
             };
-            var refreshToken = new DomainModels.RefreshToken
+            var refreshToken = new Models.RefreshToken
             {
                 AccessTokenId = Guid.Parse(accessTokenTuple.Item1.Id),
                 ExpiresOn = DateTimeOffset.UtcNow.Add(_tokenConfig.RefreshToken.Expires),
@@ -51,9 +51,7 @@ namespace Core.Services
                 Profile = profile,
             };
 
-            await _dataContext.AddAsync(profile);
-            await _dataContext.AddAsync(refreshToken);
-            await _dataContext.SaveChangesAsync();
+            await _profileFlowRepository.CreateProfileAndRefreshTokenAsync(profile.ToEntity(), refreshToken.ToEntity());
 
             return new AuthenticatedResponse
             {
@@ -63,21 +61,13 @@ namespace Core.Services
             };
         }
 
-        private async Task GuardAgainstNullOrWhiteSpace(params string[] values)
+        private static void GuardAgainstNullOrWhiteSpace(params string[] values)
         {
             foreach (var item in values)
             {
                 if (string.IsNullOrWhiteSpace(item))
                     throw new Exception(); // BadRequest
             }
-        }
-
-        private async Task GuardAgainstExistingProfileAsync(string username)
-        {
-            var exists = await _dataContext.Profile.AnyAsync(x => x.Username == username);
-
-            if (exists)
-                throw new Exception(""); // Forbidden
         }
 
         private static void ValidatePasswordStrength(string password)

@@ -1,6 +1,8 @@
-using Core.Contexts;
 using Core.Interfaces;
 using Core.Services;
+using DataLayer.EF.Contexts;
+using DataLayer.EF.Interfaces;
+using DataLayer.EF.Repositories.Flows;
 using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.EntityFrameworkCore;
 using Shared.Configuration;
@@ -23,15 +25,14 @@ builder.Services.AddSwaggerGen();
 // Services
 builder.Services.AddTransient<ICryptographicService, CryptographicService>();
 builder.Services.AddTransient<IProfileService, ProfileService>();
-builder.Services.AddTransient<IRefreshTokenService, RefreshTokenService>();
 builder.Services.AddTransient<ITokenService, TokenService>();
+
+// Repositories
+builder.Services.AddTransient<IProfileFlowRepository, ProfileFlowRepository>();
 
 // Config
 builder.Services.Configure<TokenConfig>(builder.Configuration.GetSection("Token"));
 builder.Services.Configure<PasswordConfig>(builder.Configuration.GetSection("Password"));
-
-// TODO: IIS with cookieauth-api.localhost.com
-// Then install the cert and ref it here somewhere
 
 var app = builder.Build();
 

@@ -1,4 +1,4 @@
-﻿namespace Core.DomainModels
+﻿namespace DataLayer.EF.Entities
 {
     public class RefreshToken
     {
