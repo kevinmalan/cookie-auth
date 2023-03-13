@@ -3,7 +3,7 @@ using Domain.Services;
 using DataLayer.EF.Contexts;
 using DataLayer.EF.Interfaces;
 using DataLayer.EF.Repositories;
-using DataLayer.EF.Repositories.Flows;
+using DataLayer.EF.Repositories.UnitOfWork;
 using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.EntityFrameworkCore;
 using Shared.Configuration;
@@ -29,7 +29,7 @@ builder.Services.AddTransient<IProfileService, ProfileService>();
 builder.Services.AddTransient<ITokenService, TokenService>();
 
 // Repositories
-builder.Services.AddTransient<IProfileFlowRepository, ProfileFlowRepository>();
+builder.Services.AddTransient<IProfileFlowRepository, ProfileUoWRepository>();
 builder.Services.AddTransient<IRefreshTokenRepository, RefreshTokenRepository>();
 
 // Config

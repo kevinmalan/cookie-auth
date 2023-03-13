@@ -4,11 +4,11 @@ namespace DataLayer.EF.Repositories
 {
     public class BaseRepository
     {
-        protected readonly DataContext _dataContext;
+        protected readonly DataContext DataContext;
 
         public BaseRepository(DataContext dataContext)
         {
-            _dataContext = dataContext;
+            DataContext = dataContext;
         }
     }
 }

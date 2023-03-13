@@ -1,5 +1,4 @@
-﻿using Domain.Mappers;
-using Domain.Interfaces;
+﻿using Domain.Interfaces;
 using Microsoft.Extensions.Options;
 using Shared.Configuration;
 using Shared.Dtos.Requests;
@@ -52,7 +51,7 @@ namespace Domain.Services
                 Value = $"{Guid.NewGuid()}"
             };
 
-            await _profileFlowRepository.CreateProfileAndRefreshTokenAsync(profile.ToEntity(), refreshToken.ToEntity());
+            await _profileFlowRepository.CreateProfileAndRefreshTokenAsync(profile, refreshToken);
 
             return new AuthenticatedResponse
             {
@@ -66,15 +65,21 @@ namespace Domain.Services
         {
             GuardAgainstNullOrWhiteSpace(request.Username, request.Password);
             await _profileFlowRepository.GuardAgainstProfileNotExistingAsync(request.Username);
-            var profileEntity = await _profileFlowRepository.GetProfileByUsernameAsync(request.Username);
-            var profile = profileEntity.ToModel();
+            var profile = await _profileFlowRepository.GetProfileByUsernameAsync(request.Username);
             var hashed = _cryptographicService.HashPassword(request.Password, profile.Salt);
             if (profile.PasswordHash != hashed.Hash)
                 throw new Exception(""); // Forbidden
             var role = "Admin";
             var accessTokenTuple = _tokenService.CreateAccessToken(request.Username, role);
             var idToken = _tokenService.CreateIdToken(request.Username);
-            var refreshTokenEntity = await _refreshTokenRepository.GetLatestByProfileIdAsync(profileEntity.Id);
+            var refreshToken = new Models.RefreshToken
+            {
+                AccessTokenId = Guid.Parse(accessTokenTuple.Item1.Id),
+                ExpiresOn = DateTimeOffset.UtcNow.Add(_tokenConfig.RefreshToken.Expires),
+                LookupId = Guid.NewGuid(),
+                Value = $"{Guid.NewGuid()}"
+            };
+            var refreshTokenEntity = await _refreshTokenRepository.CreateIfNotExistsAsync(refreshToken, profile.LookupId);
             return new AuthenticatedResponse
             {
                 AccessToken = accessTokenTuple.Item2,

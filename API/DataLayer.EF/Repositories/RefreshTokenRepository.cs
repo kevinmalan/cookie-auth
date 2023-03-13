@@ -1,7 +1,5 @@
 ﻿using DataLayer.EF.Contexts;
-using DataLayer.EF.Entities;
 using DataLayer.EF.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace DataLayer.EF.Repositories
 {
@@ -12,13 +10,32 @@ namespace DataLayer.EF.Repositories
         {
         }
 
-        public async Task<RefreshToken> GetLatestByProfileIdAsync(int profileId)
+        public async Task<Domain.Models.RefreshToken> CreateIfNotExistsAsync(Domain.Models.RefreshToken refreshTokenModel, Guid profileLookupId)
         {
-            return await _dataContext.RefreshToken
-                .AsNoTracking()
-                .Where(x => x.ProfileId == profileId)
-                .OrderByDescending(x => x.CreatedOn)
-                .FirstOrDefaultAsync();
+            var query = from p in DataContext.Profile
+                        join r in DataContext.RefreshToken
+                        on p.Id equals r.Id into profileLeftJoin
+                        from token in profileLeftJoin.DefaultIfEmpty()
+                        where p.LookupId == profileLookupId
+                        orderby token.ExpiresOn descending
+                        select new 
+                        {
+                            refreshToken = token,
+                            profile = p
+                        };
+
+            var result = query.FirstOrDefault();
+            var refreshToken = result?.refreshToken;
+            var profile = result?.profile ?? throw new Exception($"No profile found for lookup value '{profileLookupId}'");
+            if (refreshToken is null || refreshToken.ExpiresOn <= DateTimeOffset.UtcNow)
+            {
+                refreshToken = refreshTokenModel.ToEntity();
+                refreshToken.Profile = profile;
+                await DataContext.AddAsync(refreshToken);
+                await DataContext.SaveChangesAsync();
+            }
+
+            return refreshToken.ToModel();
         }
     }
 }

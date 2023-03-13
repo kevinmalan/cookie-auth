@@ -15,5 +15,9 @@
    <ItemGroup>
      <Folder Include="Entities\" />
    </ItemGroup>
+
+   <ItemGroup>
+     <ProjectReference Include="..\Domain.Models\Domain.Models.csproj" />
+   </ItemGroup>
    
 </Project>
