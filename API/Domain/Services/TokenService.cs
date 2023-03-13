@@ -1,4 +1,4 @@
-﻿using Core.Interfaces;
+﻿using Domain.Interfaces;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Shared.Configuration;
@@ -6,7 +6,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace Core.Services
+namespace Domain.Services
 {
     public class TokenService : ITokenService
     {

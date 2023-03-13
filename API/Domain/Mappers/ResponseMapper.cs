@@ -1,4 +1,4 @@
-﻿namespace Core.Mappers
+﻿namespace Domain.Mappers
 {
     public static class ResponseMapper
     {

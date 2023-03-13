@@ -1,5 +1,5 @@
-using Core.Interfaces;
-using Core.Services;
+using Domain.Interfaces;
+using Domain.Services;
 using DataLayer.EF.Contexts;
 using DataLayer.EF.Interfaces;
 using DataLayer.EF.Repositories;

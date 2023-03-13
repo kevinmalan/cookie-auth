@@ -1,12 +1,12 @@
-﻿using Core.Mappers;
-using Core.Interfaces;
+﻿using Domain.Mappers;
+using Domain.Interfaces;
 using Microsoft.Extensions.Options;
 using Shared.Configuration;
 using Shared.Dtos.Requests;
 using Shared.Dtos.Responses;
 using DataLayer.EF.Interfaces;
 
-namespace Core.Services
+namespace Domain.Services
 {
     public class ProfileService : IProfileService
     {

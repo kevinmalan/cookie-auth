@@ -1,11 +1,11 @@
-﻿using Core.Models;
-using Core.Interfaces;
+﻿using Domain.Models;
+using Domain.Interfaces;
 using Microsoft.Extensions.Options;
 using Shared.Configuration;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Core.Services
+namespace Domain.Services
 {
     public class CryptographicService : ICryptographicService
     {

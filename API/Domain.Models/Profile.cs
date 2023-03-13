@@ -1,4 +1,4 @@
-﻿namespace Core.Models
+﻿namespace Domain.Models
 {
     public class Profile
     {

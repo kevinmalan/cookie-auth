@@ -1,6 +1,6 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 
-namespace Core.Interfaces
+namespace Domain.Interfaces
 {
     public interface ITokenService
     {

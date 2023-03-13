@@ -1,6 +1,6 @@
-﻿using Core.Models;
+﻿using Domain.Models;
 
-namespace Core.Interfaces
+namespace Domain.Interfaces
 {
     public interface ICryptographicService
     {

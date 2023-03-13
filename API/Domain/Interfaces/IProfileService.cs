@@ -1,7 +1,7 @@
 ﻿using Shared.Dtos.Requests;
 using Shared.Dtos.Responses;
 
-namespace Core.Interfaces
+namespace Domain.Interfaces
 {
     public interface IProfileService
     {

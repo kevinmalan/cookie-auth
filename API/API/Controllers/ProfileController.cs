@@ -1,4 +1,4 @@
-﻿using Core.Interfaces;
+﻿using Domain.Interfaces;
 using DataLayer.EF.Contexts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
