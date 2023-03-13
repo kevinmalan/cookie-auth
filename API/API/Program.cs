@@ -1,20 +1,43 @@
-using Domain.Interfaces;
-using Domain.Services;
 using DataLayer.EF.Contexts;
 using DataLayer.EF.Interfaces;
 using DataLayer.EF.Repositories;
 using DataLayer.EF.Repositories.UnitOfWork;
-using Microsoft.AspNetCore.Authentication.Certificate;
+using Domain.Interfaces;
+using Domain.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Shared.Configuration;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
-    .AddAuthentication(CertificateAuthenticationDefaults.AuthenticationScheme)
-    .AddCertificate(o =>
+    .AddAuthentication(options =>
     {
-        o.AllowedCertificateTypes = CertificateTypes.All;
+        options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Token:AccessToken:Secret"])),
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration["Token:Issuer"],
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration["Token:Audience"],
+            ValidateLifetime = true,
+        };
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                context.Token = context.Request.Cookies["cookie-auth-access-token"];
+                return Task.CompletedTask;
+            }
+        };
     });
 
 builder.Configuration.AddJsonFile("appsettings.json", false, true);
