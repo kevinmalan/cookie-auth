@@ -1,7 +1,7 @@
 ﻿using DataLayer.EF.Contexts;
-using DataLayer.EF.Entities;
 using DataLayer.EF.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Shared.Exceptions;
 
 namespace DataLayer.EF.Repositories.UnitOfWork
 {
@@ -27,7 +27,7 @@ namespace DataLayer.EF.Repositories.UnitOfWork
             var exists = await DataContext.Profile.AnyAsync(x => x.Username == username);
 
             if (exists)
-                throw new Exception(""); // Forbidden
+                throw new ForbiddenException("Username already taken.");
         }
 
         public async Task GuardAgainstProfileNotExistingAsync(string username)
@@ -35,7 +35,7 @@ namespace DataLayer.EF.Repositories.UnitOfWork
             var exists = await DataContext.Profile.AnyAsync(x => x.Username == username);
 
             if (!exists)
-                throw new Exception(""); // Forbidden
+                throw new NotFoundException("No profile matching that username");
         }
 
         public async Task<Domain.Models.Profile> GetProfileByUsernameAsync(string username)

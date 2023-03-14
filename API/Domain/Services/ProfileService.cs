@@ -4,6 +4,7 @@ using Shared.Configuration;
 using Shared.Dtos.Requests;
 using Shared.Dtos.Responses;
 using DataLayer.EF.Interfaces;
+using Shared.Exceptions;
 
 namespace Domain.Services
 {
@@ -68,7 +69,7 @@ namespace Domain.Services
             var profile = await _profileFlowRepository.GetProfileByUsernameAsync(request.Username);
             var hashed = _cryptographicService.HashPassword(request.Password, profile.Salt);
             if (profile.PasswordHash != hashed.Hash)
-                throw new Exception(""); // Forbidden
+                throw new ForbiddenException("Incorrect username / password.");
             var role = "Admin";
             var accessTokenTuple = _tokenService.CreateAccessToken(request.Username, role);
             var idToken = _tokenService.CreateIdToken(request.Username);
@@ -93,7 +94,7 @@ namespace Domain.Services
             foreach (var item in values)
             {
                 if (string.IsNullOrWhiteSpace(item))
-                    throw new Exception(); // BadRequest
+                    throw new BadRequestException("Not all required fields were set");
             }
         }
 
@@ -101,7 +102,7 @@ namespace Domain.Services
         {
             if (password.Length < 9 || !password.Any(char.IsUpper) || !password.Any(char.IsLower) || !password.Any(char.IsDigit) || !password.Any(c => !char.IsLetterOrDigit(c)))
             {
-                throw new Exception("Password strength failed"); // Badrequest
+                throw new BadRequestException("Password strength failed");
             }
         }
     }

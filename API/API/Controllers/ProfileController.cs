@@ -1,5 +1,4 @@
 ﻿using Domain.Interfaces;
-using DataLayer.EF.Contexts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -76,6 +75,5 @@ namespace API.Controllers
             Response.Cookies.Append("cookie-auth-refresh-token", tokens.RefreshToken, refreshTokenOptions);
             Response.Cookies.Append("cookie-auth-id-token", tokens.IdToken, idTokenOptions);
         }
-
     }
 }
