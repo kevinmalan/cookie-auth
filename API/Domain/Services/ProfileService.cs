@@ -16,7 +16,12 @@ namespace Domain.Services
         private readonly IRefreshTokenRepository _refreshTokenRepository;
         private readonly TokenConfig _tokenConfig;
 
-        public ProfileService(ICryptographicService cryptographicService, ITokenService tokenService, IOptions<TokenConfig> tokenOptions, IProfileFlowRepository profileFlowRepository, IRefreshTokenRepository refreshTokenRepository)
+        public ProfileService(
+            ICryptographicService cryptographicService, 
+            ITokenService tokenService, 
+            IOptions<TokenConfig> tokenOptions, 
+            IProfileFlowRepository profileFlowRepository, 
+            IRefreshTokenRepository refreshTokenRepository)
         {
             _cryptographicService = cryptographicService;
             _tokenService = tokenService;
@@ -31,14 +36,15 @@ namespace Domain.Services
             await _profileFlowRepository.GuardAgainstExistingProfileAsync(request.Username);
             ValidatePasswordStrength(request.Password);
             var role = "Admin";
+            var profileLookupId = Guid.NewGuid();
             var password = _cryptographicService.HashPassword(request.Password);
-            var accessTokenTuple = _tokenService.CreateAccessToken(request.Username, role);
+            var accessTokenTuple = _tokenService.CreateAccessToken(request.Username, role, $"{profileLookupId}");
             var idToken = _tokenService.CreateIdToken(request.Username);
 
             var profile = new Models.Profile
             {
                 Username = request.Username,
-                LookupId = Guid.NewGuid(),
+                LookupId = profileLookupId,
                 CreatedOn = DateTime.UtcNow,
                 PasswordHash = password.Hash,
                 Salt = password.Salt,
@@ -71,21 +77,14 @@ namespace Domain.Services
             if (profile.PasswordHash != hashed.Hash)
                 throw new ForbiddenException("Incorrect username / password.");
             var role = "Admin";
-            var accessTokenTuple = _tokenService.CreateAccessToken(request.Username, role);
+            var accessTokenTuple = _tokenService.CreateAccessToken(request.Username, role, $"{profile.LookupId}");
             var idToken = _tokenService.CreateIdToken(request.Username);
-            var refreshToken = new Models.RefreshToken
-            {
-                AccessTokenId = Guid.Parse(accessTokenTuple.Item1.Id),
-                ExpiresOn = DateTimeOffset.UtcNow.Add(_tokenConfig.RefreshToken.Expires),
-                LookupId = Guid.NewGuid(),
-                Value = $"{Guid.NewGuid()}"
-            };
-            var refreshTokenEntity = await _refreshTokenRepository.CreateIfNotExistsAsync(refreshToken, profile.LookupId);
+            var refreshToken = await _tokenService.CreateRefreshTokenAsync(accessTokenTuple.Item1.Id, profile.LookupId);
             return new AuthenticatedResponse
             {
                 AccessToken = accessTokenTuple.Item2,
                 IdToken = idToken,
-                RefreshToken = refreshTokenEntity.Value
+                RefreshToken = refreshToken.Value
             };
         }
 
