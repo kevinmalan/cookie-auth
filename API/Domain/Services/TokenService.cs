@@ -77,34 +77,53 @@ namespace Domain.Services
             return await _refreshTokenRepository.CreateAsync(refreshToken, profileLookupId);
         }
 
-        public async Task<AuthenticatedResponse> RefreshTokensAsync(string accessToken, string refreshToken)
+        public async Task<RefreshAuthenticatedResponse> RefreshTokensAsync(string accessToken, string refreshToken)
         {
-            var accessTokenDecoded = DecodeJWT(accessToken);
-            if (accessTokenDecoded.ValidTo > DateTime.UtcNow)
+            var oldAccessToken = ValidateAccessToken(accessToken);
+            if (oldAccessToken.ValidTo > DateTime.UtcNow)
                 throw new BadRequestException("Access token is still valid.");
 
             await _refreshTokenRepository.GuardAgainstExpiring(refreshToken);
 
-            var username = accessTokenDecoded.Claims.First(x => x.Type == "username").Value;
-            var role = accessTokenDecoded.Claims.First(x => x.Type == "role").Value;
-            var profileLookupId = accessTokenDecoded.Claims.First(x => x.Type == "profile-lookup-id").Value;
+            var username = oldAccessToken.Claims.First(x => x.Type == "username").Value;
+            var role = oldAccessToken.Claims.First(x => x.Type == "role").Value;
+            var profileLookupId = oldAccessToken.Claims.First(x => x.Type == "profile-lookup-id").Value;
             var newAccessToken = CreateAccessToken(username, role, profileLookupId);
-            var newRefreshToken = await _refreshTokenRepository.RenewAsync(refreshToken, Guid.Parse(profileLookupId), Guid.Parse(newAccessToken.Item1.Id));
+            var newRefreshToken = await _refreshTokenRepository.RenewAsync(refreshToken, Guid.Parse(profileLookupId), Guid.Parse(oldAccessToken.Id), Guid.Parse(newAccessToken.Item1.Id));
 
-            return new AuthenticatedResponse
+            return new RefreshAuthenticatedResponse
             {
                 AccessToken = newAccessToken.Item2,
-                RefreshToken = newRefreshToken.Value
+                RefreshToken = newRefreshToken.Value,
+                RefreshTokenExpiresOn = newRefreshToken.ExpiresOn
             };
         }
 
-        private JwtSecurityToken DecodeJWT(string jwt)
+        private JwtSecurityToken ValidateAccessToken(string accessToken)
         {
+            var secret = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_tokenConfig.AccessToken.Secret));
             var handler = new JwtSecurityTokenHandler();
-            var token = handler.ReadJwtToken(jwt);
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = secret,
+                ValidIssuer =  _tokenConfig.Issuer,
+                ValidAudience = _tokenConfig.Audience,
+                ValidateIssuer = true,
+                ValidateAudience = true,
+            };
+            SecurityToken? token;
+            try
+            {
+                handler.ValidateToken(accessToken, validationParameters, out token);
+            }
+            catch (Exception)
+            {
+                throw new ForbiddenException("invalid access token");
+            }
+            
 
-            return token;
+            return (JwtSecurityToken)token;
         }
-
     }
 }

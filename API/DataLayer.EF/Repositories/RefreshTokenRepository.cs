@@ -19,13 +19,16 @@ namespace DataLayer.EF.Repositories
                 throw new ForbiddenException("Refresh token has expired.");
         }
 
-        public async Task<Domain.Models.RefreshToken> RenewAsync(string value, Guid profileLookupId, Guid accessTokenId)
+        public async Task<Domain.Models.RefreshToken> RenewAsync(string value, Guid profileLookupId, Guid oldAccessTokenId, Guid newAccessTokenId)
         {
-            var refreshToken = await DataContext.RefreshToken.FirstAsync(x => x.Value == value);
+            var refreshToken = await DataContext.RefreshToken.FirstOrDefaultAsync(x => x.Value == value);
+            if (refreshToken is null || refreshToken.AccessTokenId != oldAccessTokenId)
+                throw new ForbiddenException("Invalid refresh token");
+
             var newRefreshToken = new Domain.Models.RefreshToken
             {
                 Value = $"{Guid.NewGuid()}",
-                AccessTokenId = accessTokenId,
+                AccessTokenId = newAccessTokenId,
                 ExpiresOn = refreshToken.ExpiresOn,
                 LookupId = Guid.NewGuid()
             };

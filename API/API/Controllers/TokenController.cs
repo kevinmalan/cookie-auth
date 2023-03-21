@@ -41,7 +41,7 @@ namespace API.Controllers
             };
             var refreshTokenOptions = new CookieOptions
             {
-                Expires = DateTimeOffset.UtcNow.Add(_tokenConfig.RefreshToken.Expires),
+                Expires = tokens.RefreshTokenExpiresOn,
                 HttpOnly = true,
                 Domain = _tokenConfig.Issuer,
                 Path = "/",

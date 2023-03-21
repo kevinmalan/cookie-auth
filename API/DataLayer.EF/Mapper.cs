@@ -7,11 +7,11 @@
             return new Entities.Profile
             {
                 LookupId = model.LookupId,
-                CreatedOn = model.CreatedOn,
                 PasswordHash = model.PasswordHash,
                 Role = model.Role,
                 Salt = model.Salt,
                 Username = model.Username,
+                CreatedOn = DateTimeOffset.UtcNow
             };
         }
 
@@ -23,6 +23,7 @@
                 ExpiresOn = model.ExpiresOn,
                 LookupId = model.LookupId,
                 Value = model.Value,
+                CreatedOn = DateTimeOffset.UtcNow
             };
         }
 
@@ -31,7 +32,6 @@
             return new Domain.Models.Profile
             {
                 Username = entity.Username,
-                CreatedOn = entity.CreatedOn,
                 LookupId = entity.LookupId,
                 PasswordHash = entity.PasswordHash,
                 Role = entity.Role,

@@ -9,6 +9,6 @@ namespace Domain.Interfaces
         string CreateIdToken(string username);
         Task<Models.RefreshToken> CreateRefreshTokenAsync(string accessTokenId, Guid profileLookupId, Guid? lookupId = null);
 
-        Task<AuthenticatedResponse> RefreshTokensAsync(string accessToken, string refreshToken);
+        Task<RefreshAuthenticatedResponse> RefreshTokensAsync(string accessToken, string refreshToken);
     }
 }

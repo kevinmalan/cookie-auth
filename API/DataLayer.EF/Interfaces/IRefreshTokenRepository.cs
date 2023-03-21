@@ -6,7 +6,7 @@ namespace DataLayer.EF.Interfaces
     {
         Task<Domain.Models.RefreshToken> CreateAsync(Domain.Models.RefreshToken refreshTokenModel, Guid profileLookupId);
 
-        Task<Domain.Models.RefreshToken> RenewAsync(string value, Guid profileLookupId, Guid accessTokenId);
+        Task<Domain.Models.RefreshToken> RenewAsync(string value, Guid profileLookupId, Guid oldAccessTokenId, Guid newAccessTokenId);
 
         Task GuardAgainstExpiring(string value);
     }

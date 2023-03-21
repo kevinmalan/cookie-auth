@@ -45,7 +45,6 @@ namespace Domain.Services
             {
                 Username = request.Username,
                 LookupId = profileLookupId,
-                CreatedOn = DateTime.UtcNow,
                 PasswordHash = password.Hash,
                 Salt = password.Salt,
                 Role = role,
