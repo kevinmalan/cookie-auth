@@ -41,6 +41,19 @@ namespace API.Controllers
             return Ok();
         }
 
+        [Authorize]
+        [HttpPost]
+        [Route("logout")]
+        public IActionResult Logout()
+        {
+            foreach (var cookie in Request.Cookies)
+            {
+                Response.Cookies.Delete(cookie.Key);
+            }
+
+            return NoContent();
+        }
+
         private void IssueCookies(AuthenticatedResponse tokens)
         {
             var accessTokenOptions = new CookieOptions

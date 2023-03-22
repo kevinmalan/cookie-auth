@@ -40,8 +40,8 @@ namespace DataLayer.EF.Repositories
 
         public async Task<Domain.Models.RefreshToken> CreateAsync(Domain.Models.RefreshToken refreshTokenModel, Guid profileLookupId)
         {
-            var profile = await DataContext.Profile.FirstAsync(x => x.LookupId == profileLookupId);
             var refreshToken = refreshTokenModel.ToEntity();
+            var profile = await DataContext.Profile.FirstAsync(x => x.LookupId == profileLookupId);     
             refreshToken.Profile = profile;
             await DataContext.AddAsync(refreshToken);
             await DataContext.SaveChangesAsync();

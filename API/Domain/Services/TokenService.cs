@@ -41,7 +41,6 @@ namespace Domain.Services
                 signingCredentials: new SigningCredentials(secret, SecurityAlgorithms.HmacSha256)
            );
 
-
             return Tuple.Create(token, new JwtSecurityTokenHandler().WriteToken(token));
         }
 
@@ -81,7 +80,7 @@ namespace Domain.Services
         {
             var oldAccessToken = ValidateAccessToken(accessToken);
             if (oldAccessToken.ValidTo > DateTime.UtcNow)
-                throw new BadRequestException("Access token is still valid.");
+                throw new BadRequestException("Access token has not expired yet");
 
             await _refreshTokenRepository.GuardAgainstExpiring(refreshToken);
 
@@ -107,7 +106,7 @@ namespace Domain.Services
             {
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = secret,
-                ValidIssuer =  _tokenConfig.Issuer,
+                ValidIssuer = _tokenConfig.Issuer,
                 ValidAudience = _tokenConfig.Audience,
                 ValidateIssuer = true,
                 ValidateAudience = true,
@@ -121,7 +120,6 @@ namespace Domain.Services
             {
                 throw new ForbiddenException("invalid access token");
             }
-            
 
             return (JwtSecurityToken)token;
         }
