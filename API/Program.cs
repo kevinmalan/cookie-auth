@@ -10,6 +10,8 @@ using Microsoft.IdentityModel.Tokens;
 using Shared.Configuration;
 using System.Reflection;
 using System.Text;
+using Serilog;
+using API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,10 +50,20 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Serilog
+Log.Logger = new LoggerConfiguration()
+       .MinimumLevel.Information()
+       .WriteTo.Console()
+       .WriteTo.Seq("http://localhost:5341/")
+       .CreateLogger();
+
+builder.Host.UseSerilog();
+
 // Services
 builder.Services.AddTransient<ICryptographicService, CryptographicService>();
 builder.Services.AddTransient<IProfileService, ProfileService>();
 builder.Services.AddTransient<ITokenService, TokenService>();
+builder.Services.AddScoped<ApiExceptionFilter>();
 
 // Repositories
 builder.Services.AddTransient<IProfileFlowRepository, ProfileUoWRepository>();

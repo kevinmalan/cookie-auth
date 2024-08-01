@@ -6,16 +6,9 @@ using Shared.Exceptions;
 
 namespace API.Controllers
 {
-    public class TokenController : BaseController
+    public class TokenController(ITokenService tokenService, IOptions<TokenConfig> tokenOptions) : BaseController
     {
-        private readonly ITokenService _tokenService;
-        private readonly TokenConfig _tokenConfig;
-
-        public TokenController(ITokenService tokenService, IOptions<TokenConfig> tokenOptions)
-        {
-            _tokenConfig = tokenOptions.Value;
-            _tokenService = tokenService;
-        }
+        private readonly TokenConfig _tokenConfig = tokenOptions.Value;
 
         [HttpPost]
         [Route("refresh")]
@@ -28,7 +21,7 @@ namespace API.Controllers
             if (accessToken is null || idToken is null || refreshToken is null)
                 throw new ForbiddenException("Not all the required auth cookies are present.");
 
-            var tokens = await _tokenService.RefreshTokensAsync(accessToken, refreshToken);
+            var tokens = await tokenService.RefreshTokensAsync(accessToken, refreshToken);
 
             var accessTokenOptions = new CookieOptions
             {

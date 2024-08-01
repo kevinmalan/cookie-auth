@@ -8,23 +8,16 @@ using Shared.Dtos.Responses;
 
 namespace API.Controllers
 {
-    public class ProfileController : BaseController
+    public class ProfileController(IProfileService profileService, IOptions<TokenConfig> tokenOptions) : BaseController
     {
-        private readonly IProfileService _profileService;
-        private readonly TokenConfig _tokenConfig;
-
-        public ProfileController(IProfileService profileService, IOptions<TokenConfig> tokenOptions)
-        {
-            _profileService = profileService;
-            _tokenConfig = tokenOptions.Value;
-        }
+        private readonly TokenConfig _tokenConfig = tokenOptions.Value;
 
         [AllowAnonymous]
         [HttpPost]
         [Route("register")]
         public async Task<IActionResult> Register([FromBody] RegisterProfileRequest request)
         {
-            var tokens = await _profileService.CreateAsync(request);
+            var tokens = await profileService.CreateAsync(request);
             IssueCookies(tokens);
 
             return Ok();
@@ -35,7 +28,7 @@ namespace API.Controllers
         [Route("login")]
         public async Task<IActionResult> Login([FromBody] LoginProfileRequest request)
         {
-            var tokens = await _profileService.LoginAsync(request);
+            var tokens = await profileService.LoginAsync(request);
             IssueCookies(tokens);
 
             return Ok();
