@@ -40,7 +40,7 @@ namespace DataLayer.EF.Repositories.UnitOfWork
 
         public async Task<Domain.Models.Profile> GetProfileByUsernameAsync(string username)
         {
-            var profile = await DataContext.Profile.SingleAsync(x => x.Username == username);
+            var profile = await DataContext.Profile.FirstAsync(x => x.Username == username);
 
             return profile.ToModel();
         }

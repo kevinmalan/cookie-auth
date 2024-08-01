@@ -6,6 +6,12 @@
 	[PasswordHash] NVARCHAR(64) NOT NULL,
 	[Salt] NVARCHAR(64) NOT NULL,
 	[Role] NVARCHAR(50) NOT NULL,
-	[CreatedOn] DATETIMEOFFSET
+	[CreatedOn] DATETIMEOFFSET NOT NULL DEFAULT SYSDATETIMEOFFSET()
 );
+GO
+CREATE INDEX [IX_LookupId]
+ON [dbo].[Profile] ([LookupId])
+GO
+CREATE INDEX [IX_Username]
+ON [dbo].[Profile] ([Username])
 GO
