@@ -1,1 +1,1 @@
-ASP.NET 6 profile management API that makes use of HTTP header cookies to store JWT access, id and refresh tokens, which is used to auth requests. 
+.NET 8 user profile management API that makes use of HTTP header cookies to store JWT access, id and refresh tokens, which is used to auth requests. 
