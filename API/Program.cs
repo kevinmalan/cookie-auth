@@ -54,7 +54,7 @@ builder.Services.AddSwaggerGen();
 Log.Logger = new LoggerConfiguration()
        .MinimumLevel.Information()
        .WriteTo.Console()
-       .WriteTo.Seq("http://localhost:5341/")
+       .WriteTo.Seq(builder.Configuration["Seq:Url"])
        .CreateLogger();
 
 builder.Host.UseSerilog();
@@ -72,6 +72,7 @@ builder.Services.AddTransient<IRefreshTokenRepository, RefreshTokenRepository>()
 // Config
 builder.Services.Configure<TokenConfig>(builder.Configuration.GetSection("Token"));
 builder.Services.Configure<PasswordConfig>(builder.Configuration.GetSection("Password"));
+builder.Services.Configure<CookieConfig>(builder.Configuration.GetSection("Cookie"));
 
 var app = builder.Build();
 

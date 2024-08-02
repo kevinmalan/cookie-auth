@@ -8,9 +8,10 @@ using Shared.Dtos.Responses;
 
 namespace API.Controllers
 {
-    public class ProfileController(IProfileService profileService, IOptions<TokenConfig> tokenOptions) : BaseController
+    public class ProfileController(IProfileService profileService, IOptions<TokenConfig> tokenOptions, IOptions<CookieConfig> cookieOptions) : BaseController
     {
         private readonly TokenConfig _tokenConfig = tokenOptions.Value;
+        private readonly CookieConfig _cookieConfig = cookieOptions.Value;
 
         [AllowAnonymous]
         [HttpPost]
@@ -51,7 +52,7 @@ namespace API.Controllers
         {
             var accessTokenOptions = new CookieOptions
             {
-                Expires = DateTimeOffset.UtcNow.Add(_tokenConfig.AccessToken.Expires),
+                Expires = DateTimeOffset.UtcNow.Add(_cookieConfig.Expires),
                 HttpOnly = true,
                 Domain = _tokenConfig.Issuer,
                 Path = "/",
@@ -60,7 +61,7 @@ namespace API.Controllers
             };
             var idTokenOptions = new CookieOptions
             {
-                Expires = DateTimeOffset.UtcNow.Add(_tokenConfig.IdToken.Expires),
+                Expires = DateTimeOffset.UtcNow.Add(_cookieConfig.Expires),
                 HttpOnly = false,
                 Domain = _tokenConfig.Issuer,
                 Path = "/",
@@ -69,7 +70,7 @@ namespace API.Controllers
             };
             var refreshTokenOptions = new CookieOptions
             {
-                Expires = DateTimeOffset.UtcNow.Add(_tokenConfig.RefreshToken.Expires),
+                Expires = DateTimeOffset.UtcNow.Add(_cookieConfig.Expires),
                 HttpOnly = true,
                 Domain = _tokenConfig.Issuer,
                 Path = "/",
