@@ -28,7 +28,6 @@ namespace API.Middleware
                     break;
 
                 case NotFoundException nf:
-                    logger.LogError(nf, "An exception occured. Message: {Message}. CustomData: {CustomData}.", nf.Message, nf.CustomData);
                     LogError(nf, nf.CustomData);
                     _context.HttpContext.Response.StatusCode = (int)HttpStatusCode.NotFound;
                     _context.Result = new JsonResult(new
@@ -40,7 +39,6 @@ namespace API.Middleware
                     break;
 
                 case ForbiddenException fe:
-                    logger.LogError(fe, "An exception occured. Message: {Message}. CustomData: {CustomData}.", fe.Message, fe.CustomData);
                     LogError(fe, fe.CustomData);
                     _context.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
                     _context.Result = new JsonResult(new

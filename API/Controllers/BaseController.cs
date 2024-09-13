@@ -5,7 +5,7 @@ namespace API.Controllers
 {
     [ApiController]
     [TypeFilter(typeof(ApiExceptionFilter))]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class BaseController : ControllerBase
     {
     }

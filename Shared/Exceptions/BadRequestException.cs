@@ -1,10 +1,6 @@
 ﻿namespace Shared.Exceptions
 {
-    public class BadRequestException : BaseException
+    public class BadRequestException(string message, object? data = null) : BaseException(message, data)
     {
-        public BadRequestException(string message, object? data = null)
-            : base(message, data)
-        {
-        }
     }
 }

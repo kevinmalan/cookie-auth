@@ -1,10 +1,6 @@
 ﻿namespace Shared.Exceptions
 {
-    public class NotFoundException : BaseException
+    public class NotFoundException(string message, object? data = null) : BaseException(message, data)
     {
-        public NotFoundException(string message, object? data = null)
-            : base(message, data)
-        {
-        }
     }
 }

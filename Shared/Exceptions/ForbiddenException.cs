@@ -1,10 +1,6 @@
 ﻿namespace Shared.Exceptions
 {
-    public class ForbiddenException : BaseException
+    public class ForbiddenException(string message, object? data = null) : BaseException(message, data)
     {
-        public ForbiddenException(string message, object? data = null)
-            : base(message, data)
-        {
-        }
     }
 }
