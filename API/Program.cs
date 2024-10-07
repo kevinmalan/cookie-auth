@@ -12,6 +12,8 @@ using System.Reflection;
 using System.Text;
 using Serilog;
 using API.Middleware;
+using API.Endpoints;
+using Carter;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -60,10 +62,13 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog();
 
 // Services
+builder.Services.AddCarter();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddTransient<ICryptographicService, CryptographicService>();
 builder.Services.AddTransient<IProfileService, ProfileService>();
 builder.Services.AddTransient<ITokenService, TokenService>();
 builder.Services.AddScoped<ApiExceptionFilter>();
+builder.Services.AddTransient<ICookieService, CookieService>();
 
 // Repositories
 builder.Services.AddTransient<IProfileFlowRepository, ProfileUoWRepository>();
@@ -89,5 +94,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapCarter();
 
 app.Run();
