@@ -1,6 +1,5 @@
 ﻿using Carter;
 using Domain.Interfaces;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Shared.Dtos.Requests;
 using Shared.Dtos.Responses;
 
@@ -12,9 +11,7 @@ public class ProfileEndpoints : ICarterModule
     {
         var group = app.MapGroup("api/profile").WithTags("Profile");
 
-        group.MapPost("register",
-            async Task<Results<Ok<AuthenticatedResponse>, BadRequest>>
-            (RegisterProfileRequest request, IProfileService profileService, ICookieService cookieService) =>
+        group.MapPost("register", async (RegisterProfileRequest request, IProfileService profileService, ICookieService cookieService) =>
         {
             var tokens = await profileService.CreateAsync(request);
             cookieService.IssueAuthCookies(tokens);
@@ -25,11 +22,12 @@ public class ProfileEndpoints : ICarterModule
                 RefreshToken = tokens.RefreshToken,
                 IdToken = tokens.IdToken
             });
-        }).AllowAnonymous();
+        })
+        .Produces<AuthenticatedResponse>(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status400BadRequest)
+        .AllowAnonymous();
 
-        group.MapPost("login",
-            async Task<Results<Ok<AuthenticatedResponse>, BadRequest, NotFound>>
-            (LoginProfileRequest request, IProfileService profileService, ICookieService cookieService) =>
+        group.MapPost("login", async (LoginProfileRequest request, IProfileService profileService, ICookieService cookieService) =>
         {
             var tokens = await profileService.LoginAsync(request);
             cookieService.IssueAuthCookies(tokens);
@@ -40,7 +38,11 @@ public class ProfileEndpoints : ICarterModule
                 RefreshToken = tokens.RefreshToken,
                 IdToken = tokens.IdToken
             });
-        }).AllowAnonymous();
+        })
+        .Produces<AuthenticatedResponse>(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status400BadRequest)
+        .Produces(StatusCodes.Status404NotFound)
+        .AllowAnonymous();
 
         group.MapPost("logout", (ICookieService cookieService) =>
         {
